@@ -13,7 +13,7 @@ df = pd.read_csv('data/combined_data.csv')
 def get_numeric_columns(df):
     """Get all numeric columns for dropdown options."""
     return [
-        {'label': col, 'value': col}
+        {'label': col.replace('_', ' ').title(), 'value': col}
         for col in df.select_dtypes(include=[np.number]).columns
     ]
 
@@ -34,8 +34,7 @@ def create_visualization(df, chart_type, x_col, y_col, color_by, size_by=None, a
             size=size_by if size_by else None,
             trendline="ols",
             hover_data=['Country'],
-            title=f'{x_col} vs {y_col}',
-            height=600
+            title=f'{x_col.replace("_", " ").title()} vs {y_col.replace("_", " ").title()}'
         )
         
         # Add correlation information
@@ -56,8 +55,7 @@ def create_visualization(df, chart_type, x_col, y_col, color_by, size_by=None, a
             x=color_by,
             y=y_col,
             color=color_by,
-            title=f'{y_col} Distribution by {color_by}',
-            height=600
+            title=f'{y_col.replace("_", " ").title()} Distribution by {color_by.replace("_", " ").title()}'
         )
         
     elif chart_type == 'bar':
@@ -67,8 +65,7 @@ def create_visualization(df, chart_type, x_col, y_col, color_by, size_by=None, a
             x=color_by,
             y=y_col,
             color=color_by,
-            title=f'Average {y_col} by {color_by}',
-            height=600
+            title=f'Average {y_col.replace("_", " ").title()} by {color_by.replace("_", " ").title()}'
         )
         
     elif chart_type == 'line':
@@ -77,13 +74,42 @@ def create_visualization(df, chart_type, x_col, y_col, color_by, size_by=None, a
             agg_data,
             x=x_col,
             y=y_col,
-            title=f'Trend of {y_col} over {x_col}',
-            height=600
+            title=f'Trend of {y_col.replace("_", " ").title()} over {x_col.replace("_", " ").title()}'
         )
     
+    # Apply consistent styling
     fig.update_layout(
+        height=600,
         template='plotly_white',
-        margin=dict(l=0, r=0, t=50, b=0)
+        margin=dict(l=0, r=0, t=50, b=0),
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        title=dict(
+            font=dict(size=24),
+            x=0.5,
+            xanchor='center'
+        ),
+        xaxis=dict(
+            title=x_col.replace('_', ' ').title(),
+            gridcolor='rgba(0,0,0,0.1)',
+            tickfont=dict(size=12)
+        ),
+        yaxis=dict(
+            title=y_col.replace('_', ' ').title(),
+            gridcolor='rgba(0,0,0,0.1)',
+            tickfont=dict(size=12)
+        ),
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1
+        ),
+        hoverlabel=dict(
+            bgcolor='white',
+            font_size=12
+        )
     )
     
     return fig
@@ -161,117 +187,62 @@ def create_layout(df):
                             ], width=12)
                         ]),
                         
-                        # Tabbed interface for different control groups
+                        # Variable Selection Tabs
                         dbc.Tabs([
                             dbc.Tab(
-                                children=[
-                                    dbc.Row([
-                                        dbc.Col([
-                                            html.Div([
-                                                html.Label("Select Variable", className="fw-bold mb-2"),
-                                                dcc.Dropdown(
-                                                    id='x-axis',
-                                                    options=get_numeric_columns(df),
-                                                    value='valence',
-                                                    clearable=False,
-                                                    className="mb-3"
-                                                ),
-                                                html.Div([
-                                                    html.I(className="fas fa-info-circle me-2 info-icon"),
-                                                    "Select the variable for the X-axis"
-                                                ], className="help-text")
-                                            ], className="control-panel")
-                                        ], width=12)
-                                    ])
-                                ],
+                                dbc.Row([
+                                    dbc.Col([
+                                        html.Label("Select X-Axis Variable:", className="fw-bold mb-2"),
+                                        dcc.Dropdown(
+                                            id='x-axis',
+                                            options=get_numeric_columns(df),
+                                            value='valence',
+                                            clearable=False,
+                                            className="mb-3"
+                                        )
+                                    ], width=12)
+                                ]),
                                 label="X-Axis",
-                                tab_id="tab-x-axis",
-                                label_style={"padding": "0.75rem 1.5rem"}
+                                tab_id="tab-x"
                             ),
-                            
                             dbc.Tab(
-                                children=[
-                                    dbc.Row([
-                                        dbc.Col([
-                                            html.Div([
-                                                html.Label("Select Variable", className="fw-bold mb-2"),
-                                                dcc.Dropdown(
-                                                    id='y-axis',
-                                                    options=get_numeric_columns(df),
-                                                    value='Life Ladder',
-                                                    clearable=False,
-                                                    className="mb-3"
-                                                ),
-                                                html.Div([
-                                                    html.I(className="fas fa-info-circle me-2 info-icon"),
-                                                    "Select the variable for the Y-axis"
-                                                ], className="help-text")
-                                            ], className="control-panel")
-                                        ], width=12)
-                                    ])
-                                ],
+                                dbc.Row([
+                                    dbc.Col([
+                                        html.Label("Select Y-Axis Variable:", className="fw-bold mb-2"),
+                                        dcc.Dropdown(
+                                            id='y-axis',
+                                            options=get_numeric_columns(df),
+                                            value='Life Ladder',
+                                            clearable=False,
+                                            className="mb-3"
+                                        )
+                                    ], width=12)
+                                ]),
                                 label="Y-Axis",
-                                tab_id="tab-y-axis",
-                                label_style={"padding": "0.75rem 1.5rem"}
+                                tab_id="tab-y"
                             ),
-                            
                             dbc.Tab(
-                                children=[
-                                    dbc.Row([
-                                        dbc.Col([
-                                            html.Div([
-                                                html.Label("Group By", className="fw-bold mb-2"),
-                                                dcc.Dropdown(
-                                                    id='color-by',
-                                                    options=[
-                                                        {'label': 'Region', 'value': 'region'},
-                                                        {'label': 'Genre', 'value': 'track_genre'}
-                                                    ],
-                                                    value='region',
-                                                    clearable=False,
-                                                    className="mb-3"
-                                                ),
-                                                html.Div([
-                                                    html.I(className="fas fa-paint-brush me-2 info-icon"),
-                                                    "Color code your data points"
-                                                ], className="help-text")
-                                            ], className="control-panel")
-                                        ], width=12)
-                                    ])
-                                ],
+                                dbc.Row([
+                                    dbc.Col([
+                                        html.Label("Group By:", className="fw-bold mb-2"),
+                                        dcc.Dropdown(
+                                            id='color-by',
+                                            options=[
+                                                {'label': 'Region', 'value': 'region'},
+                                                {'label': 'Genre', 'value': 'track_genre'}
+                                            ],
+                                            value='region',
+                                            clearable=False,
+                                            className="mb-3"
+                                        )
+                                    ], width=12)
+                                ]),
                                 label="Color",
-                                tab_id="tab-color",
-                                label_style={"padding": "0.75rem 1.5rem"}
-                            ),
-                            
-                            dbc.Tab(
-                                children=[
-                                    dbc.Row([
-                                        dbc.Col([
-                                            html.Div([
-                                                html.Label("Chart Options", className="fw-bold mb-2"),
-                                                dbc.Checklist(
-                                                    id='plot-options',
-                                                    options=[
-                                                        {'label': 'Show Trend Line', 'value': 'trend'},
-                                                        {'label': 'Show Data Points', 'value': 'points'},
-                                                        {'label': 'Show Legend', 'value': 'legend'}
-                                                    ],
-                                                    value=['trend', 'points', 'legend'],
-                                                    switch=True,
-                                                    className="mb-3"
-                                                )
-                                            ], className="control-panel")
-                                        ], width=12)
-                                    ])
-                                ],
-                                label="Options",
-                                tab_id="tab-options",
-                                label_style={"padding": "0.75rem 1.5rem"}
+                                tab_id="tab-color"
                             )
-                        ], id="control-tabs", active_tab="tab-x-axis", className="mb-4")
+                        ], id="control-tabs", active_tab="tab-x", className="mb-4")
                     ])
-                ], className="mb-4 shadow-sm")
+                ], className="shadow-sm mb-4")
             ], width=12)
         ]),
         
@@ -280,9 +251,15 @@ def create_layout(df):
                 dbc.Card([
                     dbc.CardHeader("Visualization"),
                     dbc.CardBody([
-                        dcc.Graph(id='exploration-plot')
+                        dcc.Loading(
+                            dcc.Graph(
+                                id='exploration-plot',
+                                config={'displayModeBar': False}
+                            ),
+                            type="circle"
+                        )
                     ])
-                ], className="mb-4")
+                ], className="shadow-sm mb-4")
             ], width=12)
         ]),
         
@@ -291,9 +268,12 @@ def create_layout(df):
                 dbc.Card([
                     dbc.CardHeader("Data Summary"),
                     dbc.CardBody([
-                        html.Div(id='data-summary')
+                        dcc.Loading(
+                            html.Div(id='data-summary'),
+                            type="circle"
+                        )
                     ])
-                ])
+                ], className="shadow-sm")
             ], width=12)
         ]),
         
@@ -318,7 +298,7 @@ def create_layout(df):
                     html.Strong("Line Chart: "), 
                     "Shows trends over a continuous variable"
                 ]),
-                html.H5("Tips"),
+                html.H5("Tips", className="mt-4"),
                 html.Ul([
                     html.Li("Use the dropdowns to select different variables"),
                     html.Li("Hover over points to see detailed information"),
@@ -330,15 +310,14 @@ def create_layout(df):
     ])
 
 @callback(
-    Output('exploration-plot', 'figure'),
-    Output('data-summary', 'children'),
-    Input('chart-type', 'value'),
-    Input('x-axis', 'value'),
-    Input('y-axis', 'value'),
-    Input('color-by', 'value'),
-    Input('plot-options', 'value')
+    [Output('exploration-plot', 'figure'),
+     Output('data-summary', 'children')],
+    [Input('chart-type', 'value'),
+     Input('x-axis', 'value'),
+     Input('y-axis', 'value'),
+     Input('color-by', 'value')]
 )
-def update_exploration_plot(chart_type, x_col, y_col, color_by, options):
+def update_visualization(chart_type, x_col, y_col, color_by):
     # Create visualization
     fig = create_visualization(
         df,
@@ -346,7 +325,7 @@ def update_exploration_plot(chart_type, x_col, y_col, color_by, options):
         x_col,
         y_col,
         color_by,
-        size_by='Average MHQ Score' if 'points' in options else None
+        size_by='Average MHQ Score' if chart_type == 'scatter' else None
     )
     
     # Create data summary
@@ -368,12 +347,14 @@ def update_exploration_plot(chart_type, x_col, y_col, color_by, options):
         summary = [
             html.H5("Summary Statistics"),
             dbc.Table.from_dataframe(
-                df.groupby(color_by)[y_col].agg(['mean', 'std', 'count'])
+                df.groupby(color_by)[y_col]
+                .agg(['mean', 'std', 'count'])
                 .round(2)
                 .reset_index(),
                 striped=True,
                 bordered=True,
-                hover=True
+                hover=True,
+                className="mt-3"
             )
         ]
     
