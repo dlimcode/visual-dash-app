@@ -22,15 +22,18 @@ app = dash.Dash(
 # Load and preprocess data
 df = pd.read_csv('data/combined_data.csv')
 
+# Calculate correlations for heatmap
+music_features = ['valence', 'energy', 'danceability', 'tempo']
+mhq_dimensions = ['Average Cognition Score', 'Average Adaptability & Resilence Score',
+                 'Average Drive & Motivation Score', 'Average Mood & Outlook Score',
+                 'Average Social Self Score', 'Average Mind-Body Connection Score']
+
 # Helper function for progress bar
 def create_progress_indicator(current_step, total_steps=4):
     return dbc.Progress(
         value=(current_step / total_steps) * 100,
         className="mb-3",
-        style={"height": "4px"},
-        color="primary",
-        animated=True,
-        striped=True
+        style={"height": "4px"}
     )
 
 # Navigation sidebar
@@ -38,8 +41,8 @@ sidebar = html.Div(
     [
         html.Div(
             [
-                html.I(className="fas fa-brain fa-2x mb-3 text-white"),
-                html.H4("Navigation", className="text-white mb-3"),
+                html.I(className="fas fa-brain fa-2x mb-3"),
+                html.H4("Navigation", className="mb-3"),
             ],
             className="sidebar-header",
         ),
@@ -49,59 +52,41 @@ sidebar = html.Div(
                     [html.I(className="fas fa-home me-2"), "Introduction"],
                     href="/",
                     id="intro-link",
-                    className="nav-link-custom"
                 ),
                 dbc.NavLink(
                     [html.I(className="fas fa-music me-2"), "Music & Happiness"],
                     href="/music-happiness",
                     id="music-happiness-link",
-                    className="nav-link-custom"
                 ),
                 dbc.NavLink(
                     [html.I(className="fas fa-chart-line me-2"), "MHQ Analysis"],
                     href="/mhq-analysis",
                     id="mhq-link",
-                    className="nav-link-custom"
                 ),
                 dbc.NavLink(
                     [html.I(className="fas fa-users me-2"), "Demographics"],
                     href="/demographics",
                     id="demographics-link",
-                    className="nav-link-custom"
                 ),
                 dbc.NavLink(
                     [html.I(className="fas fa-globe me-2"), "Explore"],
                     href="/explore",
                     id="explore-link",
-                    className="nav-link-custom"
                 ),
             ],
             vertical=True,
             pills=True,
-            className="nav-pills-custom"
         ),
-        html.Div(
-            [
-                html.Hr(className="sidebar-hr"),
-                html.P(
-                    "Music & Well-being Dashboard",
-                    className="text-center text-white-50 small"
-                )
-            ],
-            className="sidebar-footer"
-        )
     ],
-    className="sidebar"
+    className="sidebar",
 )
 
 # Introduction page
 intro_layout = dbc.Container([
     dbc.Row([
         dbc.Col([
-            html.H1(
-                "Music, Happiness, and Mental Well-being",
-                className="text-center mb-4 display-4 fw-bold"
-            ),
+            html.H1("Music, Happiness, and Mental Well-being",
+                   className="text-center mb-4 gradient-text"),
             html.H5(
                 "Exploring the intricate relationships between musical preferences, "
                 "happiness levels, and mental well-being across different cultures.",
@@ -114,35 +99,24 @@ intro_layout = dbc.Container([
         dbc.Col([
             dbc.Card([
                 html.I(className="fas fa-globe-americas fa-3x text-primary mb-3"),
-                html.H4("Global Reach", className="card-title"),
-                html.P(
-                    f"{len(df['Country'].unique())} Countries Analyzed",
-                    className="card-text"
-                )
-            ], body=True, className="text-center shadow-sm highlight-card")
-        ], width=12, md=4, className="mb-4"),
-        
+                html.H4("Global Reach"),
+                html.P(f"{len(df['Country'].unique())} Countries Analyzed")
+            ], body=True, className="text-center highlight-card")
+        ], width=12, md=4),
         dbc.Col([
             dbc.Card([
                 html.I(className="fas fa-brain fa-3x text-success mb-3"),
-                html.H4("Mental Well-being", className="card-title"),
-                html.P(
-                    "6 MHQ Dimensions Explored",
-                    className="card-text"
-                )
-            ], body=True, className="text-center shadow-sm highlight-card")
-        ], width=12, md=4, className="mb-4"),
-        
+                html.H4("Mental Well-being"),
+                html.P("6 MHQ Dimensions Explored")
+            ], body=True, className="text-center highlight-card")
+        ], width=12, md=4),
         dbc.Col([
             dbc.Card([
                 html.I(className="fas fa-music fa-3x text-info mb-3"),
-                html.H4("Music Features", className="card-title"),
-                html.P(
-                    "8 Musical Attributes Analyzed",
-                    className="card-text"
-                )
-            ], body=True, className="text-center shadow-sm highlight-card")
-        ], width=12, md=4, className="mb-4"),
+                html.H4("Music Features"),
+                html.P("8 Musical Attributes Analyzed")
+            ], body=True, className="text-center highlight-card")
+        ], width=12, md=4),
     ], className="mb-5"),
     
     dbc.Row([
@@ -150,72 +124,54 @@ intro_layout = dbc.Container([
             html.H3("Key Insights", className="mb-4"),
             dbc.Card([
                 dbc.CardBody([
-                    html.H5(
-                        "Musical Happiness Connection",
-                        className="card-title"
-                    ),
+                    html.H5("Musical Happiness Connection", className="card-title"),
                     html.P(
                         "Discover how musical preferences correlate with happiness "
                         "levels across different cultures.",
                         className="card-text"
                     ),
                     dbc.Button(
-                        [
-                            html.I(className="fas fa-chart-line me-2"),
-                            "Explore Music & Happiness"
-                        ],
+                        "Explore Music & Happiness",
                         href="/music-happiness",
                         color="primary",
                         className="mt-3"
                     )
                 ])
-            ], className="mb-4 shadow-sm hover-card"),
+            ], className="mb-3 insight-card"),
             
             dbc.Card([
                 dbc.CardBody([
-                    html.H5(
-                        "Mental Well-being Patterns",
-                        className="card-title"
-                    ),
+                    html.H5("Mental Well-being Patterns", className="card-title"),
                     html.P(
                         "Explore how different aspects of mental health relate to "
                         "musical preferences and cultural factors.",
                         className="card-text"
                     ),
                     dbc.Button(
-                        [
-                            html.I(className="fas fa-brain me-2"),
-                            "Explore MHQ Analysis"
-                        ],
+                        "Explore MHQ Analysis",
                         href="/mhq-analysis",
                         color="success",
                         className="mt-3"
                     )
                 ])
-            ], className="mb-4 shadow-sm hover-card"),
+            ], className="mb-3 insight-card"),
             
             dbc.Card([
                 dbc.CardBody([
-                    html.H5(
-                        "Demographic Influences",
-                        className="card-title"
-                    ),
+                    html.H5("Demographic Influences", className="card-title"),
                     html.P(
                         "Understand how age, employment, and education affect "
                         "musical preferences and well-being.",
                         className="card-text"
                     ),
                     dbc.Button(
-                        [
-                            html.I(className="fas fa-users me-2"),
-                            "Explore Demographics"
-                        ],
+                        "Explore Demographics",
                         href="/demographics",
                         color="info",
                         className="mt-3"
                     )
                 ])
-            ], className="shadow-sm hover-card"),
+            ], className="insight-card"),
         ], width=12)
     ])
 ])
@@ -233,24 +189,15 @@ app.layout = html.Div([
         dbc.Col(
             sidebar,
             width=2,
-            className="sidebar-container p-0"
+            className="sidebar-container"
         ),
         dbc.Col(
-            [
-                dcc.Loading(
-                    html.Div(
-                        id='page-content',
-                        className="content-wrapper"
-                    ),
-                    type="circle",
-                    color="#4361ee"
-                )
-            ],
+            html.Div(id='page-content'),
             width=10,
-            className="content-container p-0"
+            className="content-container"
         )
-    ], className="g-0 h-100")
-], className="app-wrapper")
+    ])
+])
 
 # Callback to update page content
 @callback(
@@ -269,25 +216,7 @@ def display_page(pathname):
     elif pathname == '/explore':
         return explore_layout(df)
     else:
-        return html.Div([
-            html.H1(
-                "404: Page not found",
-                className="text-center text-muted mt-5"
-            ),
-            html.P(
-                "The page you're looking for doesn't exist.",
-                className="text-center"
-            ),
-            dbc.Button(
-                [
-                    html.I(className="fas fa-home me-2"),
-                    "Return Home"
-                ],
-                href="/",
-                color="primary",
-                className="d-block mx-auto mt-4"
-            )
-        ])
+        return html.H1("404: Page not found", className="text-center")
 
 # Add custom CSS
 app.index_string = '''
@@ -299,6 +228,7 @@ app.index_string = '''
         {%favicon%}
         {%css%}
         <style>
+            /* Root variables */
             :root {
                 --primary-color: #4361ee;
                 --secondary-color: #3f37c9;
@@ -310,171 +240,162 @@ app.index_string = '''
                 --white: #ffffff;
             }
             
+            /* Base styles */
             body {
                 background-color: var(--background-color);
                 color: var(--text-color);
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             }
             
             /* Sidebar styles */
             .sidebar {
                 height: 100vh;
                 position: fixed;
-                width: inherit;
                 padding: 2rem;
                 background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
-                box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-                overflow-y: auto;
             }
             
-            .sidebar-container {
-                position: sticky;
-                top: 0;
-                height: 100vh;
-                z-index: 1000;
-            }
-            
-            .content-container {
-                height: 100vh;
-                overflow-y: auto;
-            }
-            
-            .nav-link-custom {
-                color: rgba(255, 255, 255, 0.8) !important;
-                border-radius: 10px !important;
+            .sidebar .nav-link {
+                color: rgba(255, 255, 255, 0.8);
+                border-radius: 10px;
                 margin-bottom: 0.5rem;
-                transition: all 0.2s ease;
+                transition: all 0.2s;
             }
             
-            .nav-link-custom:hover {
-                color: var(--white) !important;
-                background-color: rgba(255, 255, 255, 0.1) !important;
-                transform: translateX(5px);
+            .sidebar .nav-link:hover {
+                color: var(--white);
+                background-color: rgba(255, 255, 255, 0.1);
             }
             
-            .nav-link-custom.active {
-                color: var(--white) !important;
-                background-color: rgba(255, 255, 255, 0.2) !important;
+            .sidebar .nav-link.active {
+                color: var(--white);
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+            
+            /* Control panel styles */
+            .control-panel {
+                background-color: var(--white);
+                border-radius: 8px;
+                padding: 1.5rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            
+            .control-panel label {
+                color: var(--text-color);
+                font-size: 0.95rem;
                 font-weight: 500;
             }
             
-            /* Card styles */
-            .highlight-card {
-                transition: all 0.3s ease;
+            .control-panel .help-text {
+                color: var(--text-muted);
+                font-size: 0.85rem;
+                margin-top: 0.5rem;
+            }
+            
+            /* Tab styling */
+            .nav-tabs {
+                border-bottom: 2px solid #e9ecef;
+                margin-bottom: 1rem;
+            }
+            
+            .nav-tabs .nav-link {
                 border: none;
-                height: 100%;
+                color: var(--text-muted);
+                padding: 0.75rem 1.5rem;
+                font-weight: 500;
+                transition: all 0.2s ease;
+                position: relative;
             }
             
-            .highlight-card:hover {
-                transform: translateY(-5px);
-            }
-            
-            .hover-card {
-                transition: all 0.3s ease;
+            .nav-tabs .nav-link:hover {
+                color: var(--primary-color);
                 border: none;
+                background: transparent;
             }
             
-            .hover-card:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1) !important;
+            .nav-tabs .nav-link.active {
+                color: var(--primary-color);
+                border: none;
+                background: transparent;
+                font-weight: 600;
             }
             
-            /* Progress bar */
-            .progress {
-                border-radius: 0;
-                height: 4px !important;
-            }
-            
-            /* Sidebar footer */
-            .sidebar-hr {
-                border-color: rgba(255, 255, 255, 0.1);
-                margin: 2rem 0;
-            }
-            
-            .sidebar-footer {
+            .nav-tabs .nav-link.active::after {
+                content: '';
                 position: absolute;
-                bottom: 2rem;
+                bottom: -2px;
                 left: 0;
-                right: 0;
-                padding: 0 2rem;
+                width: 100%;
+                height: 2px;
+                background-color: var(--primary-color);
             }
             
-            /* Loading spinner */
-            ._dash-loading {
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 1000;
+            /* Chart type selector */
+            .chart-type-selector .form-check {
+                padding: 0.75rem 1rem;
+                margin: 0.25rem;
+                border-radius: 8px;
+                background-color: var(--background-color);
+                transition: all 0.2s ease;
+                cursor: pointer;
             }
             
-            /* Custom scrollbar */
-            ::-webkit-scrollbar {
-                width: 8px;
+            .chart-type-selector .form-check:hover {
+                background-color: #e9ecef;
+                transform: translateY(-1px);
             }
             
-            ::-webkit-scrollbar-track {
-                background: #f1f1f1;
+            .chart-type-selector .form-check-label {
+                color: var(--text-color);
             }
             
-            ::-webkit-scrollbar-thumb {
-                background: var(--text-muted);
-                border-radius: 4px;
+            .chart-type-selector .form-check-input:checked + .form-check-label {
+                color: var(--primary-color);
+                font-weight: 600;
             }
             
-            ::-webkit-scrollbar-thumb:hover {
-                background: var(--text-color);
+            /* Dropdown styling */
+            .Select-control {
+                border-radius: 6px;
+                border: 1px solid #e9ecef;
             }
             
-            /* Layout fixes */
-            .app-wrapper {
-                min-height: 100vh;
-                display: flex;
-                flex-direction: column;
+            .Select-control:hover {
+                border-color: var(--primary-color);
             }
             
-            .content-wrapper {
-                padding: 2rem;
-                height: 100%;
-                overflow-y: auto;
+            .Select-value-label {
+                color: var(--text-color);
             }
             
-            .content-container {
-                height: 100vh;
-                overflow-y: auto;
+            .Select-placeholder {
+                color: var(--text-muted);
             }
             
-            /* Update sidebar styles */
-            .sidebar {
-                height: 100vh;
-                position: fixed;
-                width: inherit;
-                padding: 2rem;
-                background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
-                box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-                overflow-y: auto;
+            /* Card styling */
+            .card {
+                border: none;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             }
             
-            .sidebar-container {
-                position: sticky;
-                top: 0;
-                height: 100vh;
-                z-index: 1000;
+            .card-header {
+                background-color: var(--white);
+                border-bottom: 1px solid #e9ecef;
+                color: var(--text-color);
             }
             
-            /* Loading spinner positioning */
-            ._dash-loading {
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 1000;
+            /* Info icon */
+            .info-icon {
+                color: var(--text-muted);
             }
             
-            /* Adjust container max-width for better readability */
-            .container {
-                max-width: 1400px !important;
-                margin: 0 auto;
+            /* Switch styling */
+            .custom-switch .custom-control-label::before {
+                background-color: #e9ecef;
+            }
+            
+            .custom-switch .custom-control-input:checked ~ .custom-control-label::before {
+                background-color: var(--primary-color);
             }
         </style>
     </head>
