@@ -130,12 +130,6 @@ def get_overview_data():
     regional_data = df.groupby('region').agg({
         'Life Ladder': 'mean',
         'Average MHQ Score': 'mean',
-        'Average Cognition Score': 'mean',
-        'Average Drive & Motivation Score': 'mean',
-        'Average Social Self Score': 'mean',
-        'Average Mind-Body Connection Score': 'mean',
-        'Average Adaptability & Resilence Score': 'mean',
-        'Average Mood & Outlook Score': 'mean',
         **{feat: 'mean' for feat in MUSIC_FEATURES if feat in df.columns}
     }).round(3)
     
@@ -155,39 +149,25 @@ def get_overview_data():
 
 @app.server.route('/api/feature_data')
 def get_feature_data():
-    try:
-        # Transform the data into the correct format
-        feature_data = {
-            # Music features
-            'valence': df['valence'].tolist(),
-            'energy': df['energy'].tolist(),
-            'danceability': df['danceability'].tolist(),
-            'tempo': df['tempo'].tolist(),
-            'speechiness': df['speechiness'].tolist(),
-            'acousticness': df['acousticness'].tolist(),
-            'instrumentalness': df['instrumentalness'].tolist(),
-            'liveness': df['liveness'].tolist(),
-            
-            # Wellbeing metrics
-            'Life Ladder': df['Life Ladder'].tolist(),
-            'Average MHQ Score': df['Average MHQ Score'].tolist(),
-            'Average Cognition Score': df['Average Cognition Score'].tolist(),
-            'Average Drive & Motivation Score': df['Average Drive & Motivation Score'].tolist(),
-            'Average Social Self Score': df['Average Social Self Score'].tolist(),
-            'Average Mind-Body Connection Score': df['Average Mind-Body Connection Score'].tolist(),
-            'Average Adaptability & Resilence Score': df['Average Adaptability & Resilence Score'].tolist(),
-            'Average Mood & Outlook Score': df['Average Mood & Outlook Score'].tolist(),
-            
-            # Grouping variables
-            'region': df['region'].tolist(),
-            'track_genre': df['track_genre'].tolist(),
-            'Country': df['Country'].tolist()
+    data = {
+        'music_features': {
+            feature: {
+                'mean': df[feature].mean().round(3),
+                'std': df[feature].std().round(3),
+                'min': df[feature].min().round(3),
+                'max': df[feature].max().round(3)
+            } for feature in MUSIC_FEATURES if feature in df.columns
+        },
+        'wellbeing_metrics': {
+            metric: {
+                'mean': df[metric].mean().round(3),
+                'std': df[metric].std().round(3),
+                'min': df[metric].min().round(3),
+                'max': df[metric].max().round(3)
+            } for metric in WELLBEING_METRICS if metric in df.columns
         }
-        
-        return jsonify(feature_data)
-    except Exception as e:
-        print(f"Error in get_feature_data: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+    }
+    return jsonify(data)
 
 # Page routing callback
 @callback(
