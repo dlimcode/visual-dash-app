@@ -1,23 +1,42 @@
-// src/App.js
 import React, { useState } from 'react';
-import Hero from './components/Hero';
-import Dashboard from './components/Dashboard';
-import { motion, AnimatePresence } from 'framer-motion';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider, createTheme, Box } from '@mui/material';
+import CssBaseline from '@mui/material/CssBaseline';
+import GlobeMap from './pages/GlobeMap';
+import Explore from './pages/Explore';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+  components: {
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          zIndex: 1200,
+        },
+      },
+    },
+  },
+});
 
 function App() {
-  const [showDashboard, setShowDashboard] = useState(false);
 
   return (
-    <div className="App">
-      <AnimatePresence mode='wait'>
-        {!showDashboard ? (
-          <Hero key="hero" onExplore={() => setShowDashboard(true)} />
-        ) : (
-          <Dashboard key="dashboard" />
-        )}
-      </AnimatePresence>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Routes>
+          <Route path="/" element={<GlobeMap />} />
+          <Route path="/explore" element={<Explore />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 }
 
